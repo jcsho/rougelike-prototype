@@ -1,5 +1,5 @@
 use super::{CombatStats, Map, Player, Position, RunState, State, ViewShed, WantsToMelee};
-use rltk::{console, Point, Rltk, VirtualKeyCode};
+use rltk::{Point, Rltk, VirtualKeyCode};
 use specs::prelude::*;
 use std::cmp::{max, min};
 

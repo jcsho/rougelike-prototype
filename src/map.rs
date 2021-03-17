@@ -3,6 +3,10 @@ use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk, RGB};
 use specs::{Entity, World};
 use std::cmp::{max, min};
 
+const MAPWIDTH: usize = 80;
+const MAPHEIGHT: usize = 43;
+const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;
+
 #[derive(PartialEq, Copy, Clone)]
 pub enum TileType {
     Wall,
@@ -73,60 +77,16 @@ impl Map {
         }
     }
 
-    /// Makes a map with solid boundaries and 400 randomly placed walls. No guarantees that it won't
-    /// look awful.
-    pub fn new_map_test() -> Map {
-        let mut map = Map {
-            tiles: vec![TileType::Wall; 80 * 50],
-            rooms: Vec::new(),
-            width: 80,
-            height: 50,
-            revealed_tiles: vec![false; 80 * 50],
-            visible_tiles: vec![false; 80 * 50],
-            blocked: vec![false; 80 * 50],
-            tile_content: vec![Vec::new(); 80 * 50],
-        };
-
-        // Make the boundaries walls
-        for x in 0..80 {
-            let left_wall = map.xy_index(x, 0);
-            map.tiles[left_wall] = TileType::Wall;
-            let right_wall = map.xy_index(x, map.height - 1);
-            map.tiles[right_wall] = TileType::Wall;
-        }
-        for y in 0..50 {
-            let top_wall = map.xy_index(0, y);
-            map.tiles[top_wall] = TileType::Wall;
-            let bot_wall = map.xy_index(map.width - 1, y);
-            map.tiles[bot_wall] = TileType::Wall;
-        }
-
-        // Now we'll randomly splat a bunch of walls. It won't be pretty, but it's a decent illustration.
-        // First, obtain the thread-local RNG:
-        let mut rng = rltk::RandomNumberGenerator::new();
-
-        for _i in 0..400 {
-            let x = rng.roll_dice(1, 79);
-            let y = rng.roll_dice(1, 49);
-            let idx = map.xy_index(x, y);
-            if idx != map.xy_index(40, 25) {
-                map.tiles[idx] = TileType::Wall;
-            }
-        }
-
-        map
-    }
-
     pub fn new_map_rooms_and_corridors() -> Map {
         let mut map = Map {
-            tiles: vec![TileType::Wall; 80 * 50],
+            tiles: vec![TileType::Wall; MAPCOUNT],
             rooms: Vec::new(),
-            width: 80,
-            height: 50,
-            revealed_tiles: vec![false; 80 * 50],
-            visible_tiles: vec![false; 80 * 50],
-            blocked: vec![false; 80 * 50],
-            tile_content: vec![Vec::new(); 80 * 50],
+            width: MAPWIDTH as i32,
+            height: MAPHEIGHT as i32,
+            revealed_tiles: vec![false; MAPCOUNT],
+            visible_tiles: vec![false; MAPCOUNT],
+            blocked: vec![false; MAPCOUNT],
+            tile_content: vec![Vec::new(); MAPCOUNT],
         };
 
         const MAX_ROOMS: i32 = 30;
@@ -195,7 +155,7 @@ pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
         }
 
         x += 1;
-        if x > 79 {
+        if x > MAPWIDTH as i32 - 1 {
             x = 0;
             y += 1;
         }
